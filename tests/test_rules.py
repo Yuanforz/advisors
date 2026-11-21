@@ -69,6 +69,20 @@ class EffortTest(unittest.TestCase):
         self.assertEqual(eff, "high")
 
 
+class FormatTest(unittest.TestCase):
+    def test_durations(self):
+        from advisors import fmt
+        self.assertEqual([fmt.dur(x) for x in (9.24, 65, 1800, 3600, 3725)],
+                         ["9.2 s", "1 min 5 s", "30 min", "1 h", "1 h 2 min"])
+
+    def test_codex_shell_wrapper_is_unwrapped(self):
+        from advisors.backends.codex_app import shell_command_text as f
+        self.assertEqual(f("/opt/homebrew/bin/bash -lc 'nl -ba ratelimit.py'"), "nl -ba ratelimit.py")
+        self.assertEqual(f(["/bin/zsh", "-c", "ls -la"]), "ls -la")
+        self.assertEqual(f("python3 x.py"), "python3 x.py")
+        self.assertEqual(f("bash -lc 'unterminated"), "bash -lc 'unterminated")
+
+
 class LimitsTest(unittest.TestCase):
     def test_paid_breaker_cannot_be_raised(self):
         lim = config.Limits()

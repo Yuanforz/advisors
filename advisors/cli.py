@@ -359,7 +359,10 @@ def cmd_steer(a: argparse.Namespace) -> int:
     if a.json:
         print(json.dumps(r, ensure_ascii=False, indent=1))
     else:
-        print(f"{r.get('disposition')}: {r.get('note')} ({r.get('run')})")
+        disp, note = r.get("disposition"), str(r.get("note") or "")
+        if note.startswith(f"{disp}; "):
+            note = note[len(disp) + 2:]
+        print(f"{disp}: {note} ({r.get('run')})")
     return 0 if r.get("disposition") in ("delivered", "queued") else 1
 
 

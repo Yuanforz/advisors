@@ -1,0 +1,23 @@
+[groups]
+codex = 2
+
+[advisors.gpt]
+backend = "codex-app-server"
+model = "gpt-6.2-astra"
+efforts = ["low", "medium", "high", "xhigh", "max"]
+default_effort = "medium"
+group = "codex"
+paid = false
+billing = "ChatGPT subscription"
+quota = "codex"
+description = "GPT through the Codex CLI. A different vendor from the calling agent: good for an independent view."
+
+[advisors.claude]
+backend = "pi-rpc"
+model = "anthropic/claude-fable-5-2"
+efforts = ["low", "medium", "high", "xhigh", "max"]
+default_effort = "medium"
+group = "anthropic"
+paid = true
+billing = "Anthropic API"
+description = "Claude through pi. Same vendor as a calling Claude: use for a fresh context, not independence."

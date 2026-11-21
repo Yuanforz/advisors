@@ -10,3 +10,6 @@ dist/
 HANDOFF.md
 spikes/
 local/
+
+# Demo recordings (contain local temporary paths)
+docs/demo/cast.json

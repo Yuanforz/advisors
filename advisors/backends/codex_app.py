@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import shlex
 import time
 import tomllib
 from pathlib import Path
@@ -31,6 +32,20 @@ log = logging.getLogger("advisord")
 # silently, so a successful handshake does not prove a key took effect; check a real turn.
 BASE_LEAN = {"features.plugins": False, "features.apps": False,
              "features.multi_agent": False, "agents.enabled": False}
+
+
+_SHELLS = {"bash", "zsh", "sh", "dash", "fish"}
+
+
+def shell_command_text(cmd):
+    """Codex runs commands as `<shell> -lc '<command>'`. Show only the command itself."""
+    try:
+        argv = shlex.split(cmd) if isinstance(cmd, str) else list(cmd or [])
+    except ValueError:
+        return cmd
+    if len(argv) == 3 and os.path.basename(str(argv[0])) in _SHELLS and argv[1] in ("-c", "-lc", "-lic", "-ic"):
+        return argv[2]
+    return cmd
 
 
 def codex_home() -> Path:
@@ -348,7 +363,7 @@ class CodexBackend(Backend):
             elif ty == "agentMessage":
                 run.set_phase("writing")
             elif ty == "commandExecution":
-                run.add_tool("shell", summarize_args(it.get("command")))
+                run.add_tool("shell", summarize_args(shell_command_text(it.get("command"))))
             elif ty == "mcpToolCall":
                 run.add_tool(f"mcp:{it.get('server')}/{it.get('tool')}", summarize_args(it.get("arguments")))
             elif ty == "dynamicToolCall":

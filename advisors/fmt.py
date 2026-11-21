@@ -12,9 +12,9 @@ def dur(sec: float | None) -> str:
         return f"{sec:.1f} s"
     m, s = divmod(int(round(sec)), 60)
     if m < 60:
-        return f"{m} min {s} s"
+        return f"{m} min {s} s" if s else f"{m} min"
     h, m = divmod(m, 60)
-    return f"{h} h {m} min"
+    return f"{h} h {m} min" if m else f"{h} h"
 
 
 def short(sec: float | None) -> str:
