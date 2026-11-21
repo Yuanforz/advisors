@@ -21,17 +21,30 @@ from .base import Attachments, Backend, BackendError, JsonlProcess, summarize_ar
 
 log = logging.getLogger("advisord")
 
-# Section 9: a lean per-thread config. Turns off the MCP servers, plugins and apps (the codex_apps MCP)
-# from the user's Codex config; MCP servers are turned off one by one by name, read from config.toml
-# (read only). An advisor is read-only, so the multi-agent tools (spawn_agent / send_input /
-# resume_agent / wait_agent / close_agent) are turned off as well: a global AGENTS.md that asks for
-# aggressive delegation would otherwise make the advisor spawn sub-agents, and the tool definitions
-# alone cost about 2.4k tokens per request. Codex 0.171 has no per-thread switch to skip the global
-# AGENTS.md (project_doc_max_bytes = 0 only covers project files), and a separate CODEX_HOME would fork
-# the login credentials, so the file itself is still loaded. Codex accepts unknown config keys
-# silently, so a successful handshake does not prove a key took effect; check a real turn.
-BASE_LEAN = {"features.plugins": False, "features.apps": False,
-             "features.multi_agent": False, "agents.enabled": False}
+# Section 9: a lean per-thread config. Turns off what an advisor must not have or does not need, on top of the
+# user's own Codex config (read only):
+# - MCP servers, plugins and apps; MCP servers are turned off one by one by name, read from config.toml.
+# - Sub-agents. Codex 0.171 gates them with features.multi_agent_v2; the older features.multi_agent and
+#   agents.enabled keys are accepted but do nothing. With sub-agents on, every advisor turn on 2026-11-21 spawned
+#   1-7 child threads, which ran shell commands and web searches of their own, even under --tools none.
+# - Tools no advisor needs: image generation, goals, skill search, tool suggestions, the sleep tool, and the
+#   browser / computer-use tools.
+# Codex accepts unknown config keys silently, so a successful handshake proves nothing: the only check is the
+# tool list Codex records in the thread's rollout file (see tests/manual/codex_tools.py).
+# A global AGENTS.md is still loaded: Codex has no per-thread switch for it, and a separate CODEX_HOME would
+# fork the login credentials.
+BASE_LEAN = {
+    "features.plugins": False, "features.apps": False,
+    "features.multi_agent_v2": False, "features.multi_agent": False, "agents.enabled": False,
+    "features.image_generation": False, "features.goals": False, "features.skill_search": False,
+    "features.tool_suggest": False, "features.sleep_tool": False,
+    "features.browser_use": False, "features.browser_use_external": False, "features.in_app_browser": False,
+    "features.computer_use": False,
+}
+
+# --tools none: no way to reach anything beyond the prompt and its attachments. Codex 0.171 runs tools inside
+# "code mode" (one `exec` tool with nested tools), so each nested tool has to be turned off by name.
+NO_TOOLS = {"features.shell_tool": False, "features.view_image": False, "web_search": "disabled"}
 
 
 _SHELLS = {"bash", "zsh", "sh", "dash", "fish"}
@@ -68,9 +81,7 @@ def thread_config(effort: str, tools: str, lean: bool = True) -> dict:
     cfg = lean_config() if lean else {}
     cfg["model_reasoning_effort"] = effort
     if tools == "none":
-        # Remove the shell tool. view_image and apply_patch remain (apply_patch cannot write in the
-        # read-only sandbox).
-        cfg["features.shell_tool"] = False
+        cfg.update(NO_TOOLS)
     return cfg
 
 
@@ -345,6 +356,13 @@ class CodexBackend(Backend):
     def _handle(self, run: Run, ev: dict) -> None:
         m = ev.get("method") or ""
         p = ev.get("params") or {}
+        tid = p.get("threadId")
+        if tid and self.thread_id and tid != self.thread_id:
+            # Another thread (a sub-agent, if a Codex version ever starts one despite the lean config): keep it
+            # out of this turn's answer, tool count and progress, but record it.
+            if run.events and "elta" not in m:
+                run.events.write("codex-other-thread", ev)
+            return
         if "elta" in m or m == "item/reasoning/summaryPartAdded":
             run.backend_event(m)
             if m == "item/agentMessage/delta":

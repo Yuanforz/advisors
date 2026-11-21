@@ -55,7 +55,7 @@ advisors log SESSION            # a human-readable session record
   - While a session is running a turn, `ask` returns busy with the running turn's id. It never silently turns into a steer.
 - **`--tools`**
   - `read` (default): pi gets the advisor's `read_tools` (default `read,grep,find,ls`); Codex runs with the `read-only` sandbox and `approvalPolicy: never`.
-  - `none`: no tools; material can only come in through `--files`. Use it for blind review: pi's read tools are not limited to the working directory and can read other advisors' answers under `~/.advisors`.
+  - `none`: no tools; material can only come in through `--files`. Use it for blind review: pi's read tools are not limited to the working directory and can read other advisors' answers under `~/.advisors`. For Codex this turns off the shell, `view_image` and web search; Codex 0.171 nests tools inside one code-mode `exec` tool, so each is turned off by name, and `tests/manual/codex_tools.py` prints what a thread really gets.
 - **`--files`**: text files are inlined into the prompt; images are sent as image inputs.
 - **`--key`**
   - Idempotency key. Submitting the same key again returns the original turn (attaches if it is still running, returns the result if it is done), so nothing is charged twice.
@@ -132,7 +132,7 @@ Run records never go into a working directory an advisor might read. `--cwd` def
 
 - pi never gets `--no-extensions`: budget gates and providers are extensions. The config has no way to ask for it; only test advisors with a `faux` model may use it. pi always gets `--no-context-files --no-skills --no-prompt-templates --no-mcp`.
 - Codex runs with the `read-only` sandbox and `approvalPolicy: never`. Any approval request from the server is declined and logged.
-- Codex threads start with a lean config: the user's MCP servers, plugins and apps are turned off, and so are the multi-agent tools (an advisor should not spawn sub-agents). Without this, every Codex request carried about 20k tokens of tool definitions from the user's Codex setup.
+- Codex threads start with a lean config: the user's MCP servers, plugins and apps are turned off, and so are sub-agents (`features.multi_agent_v2`), image generation, goals and the browser tools. Without this, every Codex request carried about 20k tokens of tool definitions from the user's Codex setup, and advisors spawned sub-agents whose messages ended up in the answer. Events from any other thread are kept out of the turn.
 - Circuit breaker: a paid advisor's turn is stopped after 40 tool calls or 30 minutes and reported as timeout. `--timeout` cannot raise it.
 
 ## 10. Tests

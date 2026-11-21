@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from advisors import config, registry, rules, store  # noqa: E402
 from advisors.backends.base import Attachments, BackendError  # noqa: E402
-from advisors.backends.codex_app import CodexBackend, codex_quota_from_limits, lean_config, thread_config  # noqa: E402
+from advisors.backends.codex_app import BASE_LEAN, CodexBackend, codex_quota_from_limits, lean_config, thread_config  # noqa: E402
 from advisors.backends.codex_exec import build_exec_argv  # noqa: E402
 from advisors.backends.pi_rpc import FIXED_FLAGS, build_argv  # noqa: E402
 from advisors.probe import effective_efforts, pi_levels  # noqa: E402
@@ -215,9 +215,9 @@ class ArgvTest(unittest.TestCase):
             (Path(d) / "config.toml").write_text('[mcp_servers.node_repl]\ncommand = "x"\n[mcp_servers.other]\ncommand = "y"\n')
             with mock.patch.dict(os.environ, {"CODEX_HOME": d}):
                 cfg = lean_config()
-                self.assertEqual(cfg, {"features.plugins": False, "features.apps": False,
-                                       "features.multi_agent": False, "agents.enabled": False,
-                                       "mcp_servers.node_repl.enabled": False, "mcp_servers.other.enabled": False})
+                expected = dict(BASE_LEAN)
+                expected.update({"mcp_servers.node_repl.enabled": False, "mcp_servers.other.enabled": False})
+                self.assertEqual(cfg, expected)
                 tc = thread_config("low", "none")
                 self.assertEqual(tc["model_reasoning_effort"], "low")
                 self.assertFalse(tc["features.shell_tool"])
@@ -303,6 +303,31 @@ class CodexEventsTest(unittest.TestCase):
         self.assertEqual(run.steers[0]["state"], "delivered")
         self.assertEqual(run.usage["input"], 16000)  # the 14k tokens before this turn are not counted
         self.assertEqual(run.usage["output"], 50)
+
+    def test_other_threads_are_ignored(self):
+        b = CodexBackend(A["gpt"], {"session": "s"}, {}, {})
+        b.thread_id = "main"
+        run = make_run(A["gpt"])
+        b.turn_id = "t1"
+        for e in [
+            {"method": "item/started", "params": {"threadId": "child", "item": {"type": "commandExecution", "command": "cat x"}}},
+            {"method": "item/agentMessage/delta", "params": {"threadId": "child", "delta": "CHILD"}},
+            {"method": "item/completed", "params": {"threadId": "child", "item": {"type": "agentMessage", "text": "CHILD", "phase": "final_answer"}}},
+            {"method": "item/agentMessage/delta", "params": {"threadId": "main", "delta": "Hi"}},
+            {"method": "item/completed", "params": {"threadId": "main", "item": {"type": "agentMessage", "text": "Hi", "phase": "final_answer"}}},
+        ]:
+            b._handle(run, e)
+        b._finish(run, {"id": "t1", "status": "completed"})
+        self.assertEqual(run.final_answer(), "Hi")
+        self.assertEqual(run.tool_calls, 0)
+
+    def test_no_tools_config_turns_off_nested_tools(self):
+        cfg = thread_config("low", "none")
+        for k in ("features.shell_tool", "features.view_image", "features.multi_agent_v2", "features.image_generation"):
+            self.assertIs(cfg[k], False, k)
+        self.assertEqual(cfg["web_search"], "disabled")
+        self.assertNotIn("web_search", thread_config("low", "read"))
+        self.assertIs(thread_config("low", "read")["features.multi_agent_v2"], False)
 
     def test_interrupted_and_other_failures(self):
         b = CodexBackend(A["gpt"], {"session": "s"}, {}, {})

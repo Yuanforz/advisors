@@ -48,7 +48,7 @@ advisors log SESSION
 - **Paid circuit breaker**: a turn of an advisor with `paid = true` stops after 40 tool calls or 30 minutes. `--timeout` cannot raise it.
 - **Efforts**: an effort the advisor does not allow is lowered to the nearest allowed one, and the metadata says so.
 - **pi** always runs with `--no-context-files --no-skills --no-prompt-templates --no-mcp` and never with `--no-extensions`, so budget gates and custom providers keep working.
-- **Codex** runs with the read-only sandbox and `approvalPolicy: never`, approval requests are declined, and the user's MCP servers, plugins, apps and multi-agent tools are turned off for advisor threads.
+- **Codex** runs with the read-only sandbox and `approvalPolicy: never`, approval requests are declined, and the user's MCP servers, plugins, apps and sub-agents are turned off for advisor threads. With `--tools none` the shell, `view_image` and web search are off too; `tests/manual/codex_tools.py` prints the tools a thread really gets.
 
 ## What advisors can see
 
