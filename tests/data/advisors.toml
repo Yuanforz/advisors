@@ -1,0 +1,50 @@
+# Advisor table for the unit tests. Nothing here is ever started.
+
+[groups]
+codex = 2
+vertex = 2
+
+[advisors.gpt]
+backend = "codex-app-server"
+model = "gpt-6.2-astra"
+efforts = ["low", "medium", "high", "xhigh", "max"]
+default_effort = "max"
+paid = false
+quota = "codex"
+description = "Codex advisor"
+
+[advisors.wide]
+backend = "pi-rpc"
+model = "example/wide-model"
+efforts = ["low", "medium", "high", "xhigh"]
+default_effort = "xhigh"
+group = "shared"
+paid = false
+read_tools = ["read", "read_many", "grep", "find", "ls"]
+description = "pi advisor up to xhigh"
+
+[advisors.narrow]
+backend = "pi-rpc"
+model = "example/narrow-model"
+efforts = ["low", "medium", "high"]
+group = "shared"
+paid = false
+description = "pi advisor up to high"
+
+[advisors.gemini]
+backend = "pi-rpc"
+model = "google-vertex/gemini-4-carbon"
+efforts = ["low", "medium", "high"]
+default_effort = "high"
+group = "vertex"
+paid = true
+quota = "vertex-budget"
+description = "paid pi advisor with a budget gate"
+
+[advisors.claude]
+backend = "pi-rpc"
+model = "anthropic/claude-fable-5-2"
+efforts = ["low", "medium", "high", "xhigh", "max"]
+default_effort = "high"
+paid = true
+description = "paid pi advisor up to max"

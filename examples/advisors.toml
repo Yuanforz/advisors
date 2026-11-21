@@ -1,0 +1,73 @@
+# advisors configuration. Copy to ~/.advisors/advisors.toml (or point $ADVISORS_CONFIG at it) and edit.
+# The daemon checks the file on every request, so edits apply without a restart. A broken edit keeps the
+# last good table, and `advisors list` shows the error.
+#
+# Each [advisors.<id>] table defines one advisor:
+#
+#   backend         "codex-app-server" (Codex CLI's app-server) or "pi-rpc" (pi --mode rpc)
+#   model           Codex: the model name. pi: provider/model, as `pi --list-models` prints it
+#   efforts         the reasoning efforts you allow, from off, minimal, low, medium, high, xhigh, max.
+#                   An unsupported request is lowered to the nearest allowed effort (ties go lower)
+#   default_effort  used when `ask` has no --effort (default: the highest in efforts)
+#   paid            required. true puts the circuit breaker on every turn (40 tool calls, 30 minutes)
+#   group           concurrency group (default: "codex", or the pi provider). Limits are in [groups]
+#   billing         one line shown by `advisors list`
+#   quota           where `advisors list` reads the remaining quota:
+#                     "codex"          Codex account/rateLimits (codex-app-server only)
+#                     "vertex-budget"  read-only estimate from the bundled vertex-budget pi extension
+#                     "<name>:<arg>"   a quota source defined by a plugin in ~/.advisors/plugins/
+#   read_tools      pi only: the tool allowlist for `--tools read` (default read, grep, find, ls).
+#                   Add "read_many" if you installed pi-extensions/read-many.ts
+#   description     shown by `advisors list`. The calling model picks advisors from it, so say what the
+#                   advisor is good for, what it costs, and when not to use it
+#   [advisors.<id>.notes]  optional overrides for the capability lines (steer, interrupt, thinking,
+#                   usage, resume), e.g. what you have verified for this provider
+
+[groups]
+codex = 2
+vertex = 2
+anthropic = 2
+
+[advisors.gpt]
+backend = "codex-app-server"
+model = "gpt-6.2-astra"
+efforts = ["low", "medium", "high", "xhigh", "max"]
+default_effort = "high"
+group = "codex"
+paid = false
+billing = "ChatGPT subscription (through Codex)"
+quota = "codex"
+description = """
+A GPT model through the Codex CLI, on your ChatGPT subscription quota (5-hour and weekly windows; when it
+runs out, `advisors list` shows when it resets). A different vendor from the calling Claude, so a good
+first choice for an independent view. Use --effort low for quick questions.
+"""
+
+[advisors.gemini]
+backend = "pi-rpc"
+model = "google-vertex/gemini-4-carbon"
+efforts = ["low", "medium", "high"]
+default_effort = "high"
+group = "vertex"
+paid = true
+billing = "Vertex AI, pay as you go"
+quota = "vertex-budget"
+read_tools = ["read", "read_many", "grep", "find", "ls"]
+description = """
+Gemini through pi on the Vertex AI API (paid). Name the files to read instead of letting it explore the
+whole repository: long contexts get expensive. Exit code 4 means the vertex-budget extension blocked the
+request before it was sent; stop and tell the user instead of working around it.
+"""
+
+[advisors.claude]
+backend = "pi-rpc"
+model = "anthropic/claude-sonnet-5-5"
+efforts = ["low", "medium", "high", "xhigh", "max"]
+default_effort = "medium"
+group = "anthropic"
+paid = true
+billing = "Anthropic API, pay as you go"
+description = """
+Claude through pi on the Anthropic API (paid). The same vendor as a calling Claude, so the least
+independent view; useful for a fresh context or a deliberate debate partner.
+"""

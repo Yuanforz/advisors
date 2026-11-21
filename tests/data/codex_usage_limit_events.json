@@ -1,0 +1,102 @@
+{
+ "_note": "Real app-server events from a turn that hit the Codex usage limit (2026-11-20), with thread and turn ids replaced.",
+ "events": [
+  {
+   "method": "thread/status/changed",
+   "params": {
+    "threadId": "00000000-0000-4000-8000-00000000a001",
+    "status": {
+     "type": "active",
+     "activeFlags": []
+    }
+   },
+   "emittedAtMs": 1795244508061
+  },
+  {
+   "method": "turn/started",
+   "params": {
+    "threadId": "00000000-0000-4000-8000-00000000a001",
+    "turn": {
+     "id": "00000000-0000-4000-8000-00000000b001",
+     "rootTurnId": "00000000-0000-4000-8000-00000000b001",
+     "items": [],
+     "itemsView": "notLoaded",
+     "status": "inProgress",
+     "error": null,
+     "startedAt": 1795244507,
+     "completedAt": null,
+     "durationMs": null
+    }
+   },
+   "emittedAtMs": 1795244508061
+  },
+  {
+   "method": "account/rateLimits/updated",
+   "params": {
+    "rateLimits": {
+     "limitId": "premium",
+     "limitName": null,
+     "normalModelSlug": null,
+     "primary": null,
+     "secondary": null,
+     "credits": {
+      "hasCredits": false,
+      "unlimited": false,
+      "balance": "0"
+     },
+     "individualLimit": null,
+     "spendControlReached": null,
+     "planType": null,
+     "rateLimitReachedType": null
+    }
+   },
+   "emittedAtMs": 1795244509266
+  },
+  {
+   "method": "error",
+   "params": {
+    "error": {
+     "message": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at Nov 21st, 2026 2:25 AM.",
+     "codexErrorInfo": "usageLimitExceeded",
+     "additionalDetails": null,
+     "misalignment": null
+    },
+    "willRetry": false,
+    "threadId": "00000000-0000-4000-8000-00000000a001",
+    "turnId": "00000000-0000-4000-8000-00000000b001"
+   }
+  },
+  {
+   "method": "thread/status/changed",
+   "params": {
+    "threadId": "00000000-0000-4000-8000-00000000a001",
+    "status": {
+     "type": "systemError"
+    }
+   },
+   "emittedAtMs": 1795244509267
+  },
+  {
+   "method": "turn/completed",
+   "params": {
+    "threadId": "00000000-0000-4000-8000-00000000a001",
+    "turn": {
+     "id": "00000000-0000-4000-8000-00000000b001",
+     "rootTurnId": "00000000-0000-4000-8000-00000000b001",
+     "items": [],
+     "itemsView": "notLoaded",
+     "status": "failed",
+     "error": {
+      "message": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at Nov 21st, 2026 2:25 AM.",
+      "codexErrorInfo": "usageLimitExceeded",
+      "additionalDetails": null,
+      "misalignment": null
+     },
+     "startedAt": 1795244507,
+     "completedAt": 1795244509,
+     "durationMs": 1900
+    }
+   }
+  }
+ ]
+}

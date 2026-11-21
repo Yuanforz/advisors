@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "advisors"
+version = "0.1.0"
+description = "Let a coding agent consult other models (via pi or the Codex CLI) as advisors: one command, a local daemon, progress, steering, stopping, and records on disk."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+authors = [{ name = "Yuanforz" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Environment :: Console",
+]
+
+[project.urls]
+Homepage = "https://github.com/Yuanforz/advisors"
+Issues = "https://github.com/Yuanforz/advisors/issues"
+
+[project.scripts]
+advisors = "advisors.cli:main"
+advisord = "advisors.daemon:main"
+
+[tool.setuptools]
+packages = ["advisors", "advisors.backends"]

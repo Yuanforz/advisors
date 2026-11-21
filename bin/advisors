@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""The advisors CLI. Entry point for running from a checkout; `pip install` provides the same commands."""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+from advisors.cli import main  # noqa: E402
+
+sys.exit(main())
