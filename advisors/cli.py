@@ -489,9 +489,8 @@ def build_parser() -> argparse.ArgumentParser:
                    "images are sent as image input")
     q.add_argument("--cwd", help="the advisor's working directory (default: the current directory; new sessions only)")
     q.add_argument("--tools", choices=["read", "none"], default="read",
-                   help="read (default): read-only tools; none: no tools, so material can only come from --files "
-                        "(use it for blind review: pi's read tools are not limited to a path and could read other "
-                        "advisors' answers in ~/.advisors)")
+                   help="read (default): read-only tools (pi: read files; Codex: also commands in a read-only "
+                        "sandbox and web search). none: no tools, so the answer rests on --files alone")
     q.add_argument("--key", help="idempotency key: resubmitting the same key returns the original turn "
                    "and is not charged again")
     q.add_argument("--label", help="a recognizable name for this turn (and for a new session)")

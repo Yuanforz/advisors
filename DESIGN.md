@@ -21,6 +21,7 @@ Code comments refer to the numbered sections below.
   - `pi-rpc`: one `pi --mode rpc` process per active session. pi reaches many providers (Anthropic, Vertex, OpenAI-compatible APIs, and providers added by pi extensions).
   - `codex-app-server`: one `codex app-server` (stdio JSON-RPC) per active session.
   - A session idle for 10 minutes has its backend process closed. The next question resumes from disk (pi `--session-id`, Codex `thread/resume`).
+- **Independence note**: every advisor gets a short instruction (pi: `--append-system-prompt`; Codex: `developerInstructions`) to check claims with its own tools and not to open other reviewers' records (the advisors data directory, `~/.codex/sessions`, `~/.pi/agent/sessions`). It is a soft rule on purpose: walling advisors off would cost the tools that make a second opinion worth having.
 - **Skill**: `skill/SKILL.md` covers judgment only: when to consult, foreground or background, blind review, multi-advisor discussion, cost. Flags live in `advisors --help`, not in the skill. Which advisor is good for what lives in each advisor's `description` in the config, so the skill stays generic.
 - **Plugins**: `~/.advisors/plugins/*.py` can add quota sources (see `advisors/plugins.py`).
 
@@ -55,7 +56,7 @@ advisors log SESSION            # a human-readable session record
   - While a session is running a turn, `ask` returns busy with the running turn's id. It never silently turns into a steer.
 - **`--tools`**
   - `read` (default): pi gets the advisor's `read_tools` (default `read,grep,find,ls`); Codex runs with the `read-only` sandbox and `approvalPolicy: never`.
-  - `none`: no tools; material can only come in through `--files`. Use it for blind review: pi's read tools are not limited to the working directory and can read other advisors' answers under `~/.advisors`. For Codex this turns off the shell, `view_image` and web search; Codex 0.171 nests tools inside one code-mode `exec` tool, so each is turned off by name, and `tests/manual/codex_tools.py` prints what a thread really gets.
+  - `none`: no tools; material can only come in through `--files`. For an answer that must rest on the attached material alone. For Codex this turns off the shell, `view_image` and web search; Codex 0.171 nests tools inside one code-mode `exec` tool, so each is turned off by name, and `tests/manual/codex_tools.py` prints what a thread really gets.
 - **`--files`**: text files are inlined into the prompt; images are sent as image inputs.
 - **`--key`**
   - Idempotency key. Submitting the same key again returns the original turn (attaches if it is still running, returns the result if it is done), so nothing is charged twice.

@@ -19,6 +19,12 @@ Run `advisors list`. It shows each advisor's description, whether it is availabl
 - Prefer subscription advisors over paid ones unless the task needs a specific paid model or the user asked for it.
 - Use `--effort low` for simple questions; high efforts are slower and spend more quota.
 
+## Tools
+
+- Give advisors tools (`--tools read`, the default). pi advisors can read files; Codex advisors can also run commands in a read-only sandbox and search the web. An advisor that checks the code, data and docs itself is worth much more than one that only reads your summary.
+- Every advisor is told not to open other reviewers' records, so tools do not spoil a blind review.
+- Use `--tools none` only when the answer must rest on the attached material alone, for example judging a text as written. Then attach everything with `--files`.
+
 ## Foreground or background
 
 - Short questions (no file reading, low effort, an answer within a minute or two): run in the foreground and wait.
@@ -37,7 +43,7 @@ Run `advisors list`. It shows each advisor's description, whether it is availabl
 The goal is independent opinions that cannot influence each other.
 
 1. Open a new session per advisor with the same question.
-2. Use `--tools none` and attach all material with `--files`. pi's read tools are not limited to the working directory and could read other advisors' answers under `~/.advisors`; with read tools it is not a blind review.
+2. Keep the tools on and point each advisor at the material (paths in the working directory, or `--files`). Don't put other reviewers' answers in the working directory.
 3. Don't put your own conclusion or leaning in the question. Give the problem, the material, and the aspects to cover.
 4. Run them in parallel in the background. Concurrency groups queue anything beyond their limits, so you don't have to count.
 5. Label the round with `--label` (for example `blind-1`) so `advisors log` is easy to read later.

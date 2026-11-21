@@ -11,7 +11,7 @@ import time
 
 from .. import rules, store
 from ..run import Run
-from .base import Attachments, Backend, BackendError, JsonlProcess, summarize_args
+from .base import Attachments, Backend, BackendError, JsonlProcess, independence_note, summarize_args
 
 log = logging.getLogger("advisord")
 
@@ -28,7 +28,7 @@ _BUDGET_NOTIFY_MARKERS = ("blocked; the request was not sent", "已拦下")
 
 def build_argv(pi_bin: str, advisor, backend_session_id: str, effort: str, tools: str) -> list[str]:
     argv = [pi_bin, "--mode", "rpc", "--model", advisor.model, "--thinking", effort,
-            "--session-id", backend_session_id, *FIXED_FLAGS]
+            "--session-id", backend_session_id, *FIXED_FLAGS, "--append-system-prompt", independence_note()]
     if tools == "none":
         argv.append("--no-tools")
     else:

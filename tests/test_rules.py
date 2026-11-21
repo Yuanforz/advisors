@@ -176,6 +176,16 @@ class ArgvTest(unittest.TestCase):
                 else:
                     self.assertEqual(argv[argv.index("--tools") + 1], ",".join(A[aid].read_tools))
 
+    def test_independence_note_reaches_every_advisor(self):
+        from advisors.backends.base import independence_note
+        note = independence_note()
+        self.assertIn("other reviewers' records", note)
+        self.assertIn("sessions", note)
+        argv = build_argv("pi", A["wide"], "s", "low", "read")
+        self.assertEqual(argv[argv.index("--append-system-prompt") + 1], note)
+        exec_argv = build_exec_argv("codex", "m", "low", "read", "/w", None, [])
+        self.assertTrue(any(x.startswith("developer_instructions=") for x in exec_argv))
+
     def test_faux_gets_no_extensions_only_with_explicit_e(self):
         a = registry.Advisor(id="test-x", backend=registry.PI, model="faux/fast", efforts=("low",), default_effort="low",
                              billing="", group="test", paid=False, description="", extensions=("/x.ts",),

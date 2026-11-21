@@ -11,6 +11,7 @@ import signal
 from pathlib import Path
 from typing import Any, Callable
 
+from .. import config
 from ..registry import Advisor
 from ..run import Run
 
@@ -201,6 +202,25 @@ class Attachments:
 
     def message(self, prompt: str) -> str:
         return f"{self.text}{prompt}" if self.text else prompt
+
+
+def _tilde(path: Path) -> str:
+    home = str(Path.home())
+    s = str(path)
+    return "~" + s[len(home):] if s.startswith(home + os.sep) else s
+
+
+def independence_note() -> str:
+    """Instructions every advisor gets (pi: appended system prompt; Codex: developer instructions).
+
+    A soft rule by design: advisors keep their tools, and are asked not to look at other reviewers' records.
+    """
+    pi_dir = Path(os.environ.get("PI_CODING_AGENT_DIR") or Path.home() / ".pi" / "agent").expanduser()
+    codex_dir = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex").expanduser()
+    records = ", ".join(_tilde(p) for p in (config.home(), codex_dir / "sessions", pi_dir / "sessions"))
+    return ("You are being consulted as an independent advisor by another agent, and other models may get the same "
+            "question. Check claims yourself with the tools you have instead of taking them on trust. Keep your view "
+            f"independent: do not open other reviewers' records, which are kept in {records}.")
 
 
 def summarize_args(args: Any, limit: int = 160) -> str:

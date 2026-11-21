@@ -258,8 +258,10 @@ class Basic(unittest.TestCase):
         rc, r = self.e.json("ask", "test-faux", "FAUX:echo", "--tools", "none")
         self.assertEqual(rc, 0)
         sess = r["session"]
-        self.assertIn(f"--session-id advisors-{sess} --no-context-files --no-skills --no-prompt-templates --no-mcp --no-tools",
-                      self.e.log())
+        first = [l for l in self.e.log().splitlines() if f"advisors-{sess}" in l and "started pid" in l][0]
+        self.assertIn(f"--session-id advisors-{sess} --no-context-files --no-skills --no-prompt-templates --no-mcp", first)
+        self.assertIn("--no-tools", first)
+        self.assertIn("--append-system-prompt", first)
         rc, r = self.e.json("ask", "--session", sess, "FAUX:echo", "--tools", "read")
         self.assertEqual(rc, 0)
         self.assertIn("turns=2", r["answer"])  # a new tool setting restarts pi; history comes from disk

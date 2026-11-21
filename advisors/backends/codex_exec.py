@@ -13,7 +13,7 @@ import logging
 
 from .. import rules, store
 from ..run import Run
-from .base import Attachments, Backend, BackendError, JsonlProcess, summarize_args
+from .base import Attachments, Backend, BackendError, JsonlProcess, independence_note, summarize_args
 from .codex_app import thread_config
 
 log = logging.getLogger("advisord")
@@ -33,6 +33,7 @@ def build_exec_argv(codex_bin: str, model: str, effort: str, tools: str, cwd: st
     cfg["sandbox_mode"] = "read-only"
     cfg["approval_policy"] = "never"
     cfg["model"] = model
+    cfg["developer_instructions"] = independence_note()
     argv = [codex_bin, "exec"]
     if thread_id:
         argv += ["resume", thread_id]

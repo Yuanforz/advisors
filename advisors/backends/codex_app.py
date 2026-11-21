@@ -17,7 +17,7 @@ from pathlib import Path
 
 from .. import __version__, rules, store
 from ..run import Run
-from .base import Attachments, Backend, BackendError, JsonlProcess, summarize_args
+from .base import Attachments, Backend, BackendError, JsonlProcess, independence_note, summarize_args
 
 log = logging.getLogger("advisord")
 
@@ -227,6 +227,7 @@ class CodexBackend(Backend):
                 "approvalPolicy": "never",
                 "model": self.advisor.model,
                 "config": thread_config(run.effort, run.tools),
+                "developerInstructions": independence_note(),
             }
             if self.meta.get("backend_session_id"):
                 res = await self.request("thread/resume", {"threadId": self.meta["backend_session_id"], **params, "excludeTurns": True}, 60)
