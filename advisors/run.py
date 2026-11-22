@@ -180,16 +180,17 @@ class Run:
             limit = tail if tail > 0 else 4000
             chunk = text[start : start + limit]
         kind, age = self.last_event_desc()
+        phase = "done" if self.finished() else self.phase
         snap = {
             "run": self.id,
             "session": self.session,
             "turn": self.turn,
             "advisor": self.advisor.id,
             "label": self.label,
-            "phase": self.phase,
-            "phase_text": rules.PHASES.get(self.phase, self.phase),
-            "phase_detail": self.phase_detail,
-            "queue": {"group": self.queue_group, "position": self.queue_pos} if self.phase == "queued" else None,
+            "phase": phase,
+            "phase_text": rules.PHASES.get(phase, phase),
+            "phase_detail": None if self.finished() else self.phase_detail,
+            "queue": {"group": self.queue_group, "position": self.queue_pos} if phase == "queued" else None,
             "last_backend_event": kind,
             "last_backend_event_age_sec": round(age, 1) if age is not None else None,
             "progress_note": self.quiet_text(quiet_sec),

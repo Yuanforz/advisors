@@ -510,6 +510,8 @@ class Daemon:
                 return
             run.started = time.monotonic()
             run.set_phase("connecting")
+            # The turn's meta.json said "queued" until now; readers of the files should see that it is running.
+            store.save_turn_meta(run.session, run.turn, run.turn_meta())
             watchdog = asyncio.create_task(self._watchdog(ss, run))
             async with ss.lock:
                 if ss.backend and not ss.backend.alive():

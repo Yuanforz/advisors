@@ -115,6 +115,8 @@ class Basic(unittest.TestCase):
         self.assertTrue(s, "the answer text did not grow")
         self.assertFalse(s["finished"])
         self.assertEqual(s["phase"], "writing")
+        tm = json.loads((self.e.home / "sessions" / run.rsplit(":", 1)[0] / "turns/1.meta.json").read_text())
+        self.assertEqual(tm["status"], "running")  # not "queued" until the end
         self.assertLessEqual(len(s["tail"]), 20)
         self.assertLess(s["last_backend_event_age_sec"], 5)
         cur = s["cursor"]
@@ -126,6 +128,7 @@ class Basic(unittest.TestCase):
             got += s["tail"]
             cur = s["cursor"]
             if s["finished"]:
+                self.assertEqual(s["phase"], "done")
                 break
             time.sleep(0.5)
         rc, out, err = self.e.finish(proc)
