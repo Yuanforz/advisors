@@ -175,6 +175,13 @@ def capability_view(advisor: Advisor, caps: dict | None) -> dict:
     return view
 
 
+def read_tools_view(advisor: Advisor) -> str:
+    """What an advisor can use under --tools read, for `advisors list`."""
+    if advisor.backend == PI:
+        return ", ".join(advisor.read_tools)
+    return "commands in a read-only sandbox, web search, view_image"
+
+
 def availability(advisor: Advisor, caps: dict | None) -> tuple[bool, str]:
     if not caps:
         return True, "not probed yet"

@@ -20,7 +20,7 @@ from advisors.backends.base import Attachments, BackendError  # noqa: E402
 from advisors.backends.codex_app import BASE_LEAN, CodexBackend, codex_quota_from_limits, lean_config, thread_config  # noqa: E402
 from advisors.backends.codex_exec import build_exec_argv  # noqa: E402
 from advisors.backends.pi_rpc import FIXED_FLAGS, build_argv  # noqa: E402
-from advisors.probe import effective_efforts, pi_levels  # noqa: E402
+from advisors.probe import effective_efforts, pi_levels, read_tools_view  # noqa: E402
 from advisors import quota  # noqa: E402
 from advisors.run import Run  # noqa: E402
 
@@ -477,6 +477,13 @@ class ConfigTest(unittest.TestCase):
     def test_example_config_is_valid(self):
         adv, _ = registry.load_config(Path(__file__).resolve().parent.parent / "examples" / "advisors.toml")
         self.assertTrue(adv)
+
+
+class ReadToolsViewTest(unittest.TestCase):
+    def test_pi_lists_its_allowlist_and_codex_describes_its_sandbox(self):
+        pi_adv = next(a for a in A.values() if a.backend == registry.PI and "read_many" in a.read_tools)
+        self.assertEqual(read_tools_view(pi_adv), ", ".join(pi_adv.read_tools))
+        self.assertIn("web search", read_tools_view(A["gpt"]))
 
 
 class PluginTest(unittest.TestCase):

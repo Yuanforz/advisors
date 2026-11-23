@@ -302,6 +302,9 @@ class Basic(unittest.TestCase):
         self.assertEqual(rc, 0)
         ids = [a["id"] for a in d["advisors"]]
         self.assertEqual(sorted(ids), ["test-faux", "test-slow"])
+        self.assertEqual(d["advisors"][0]["tools"], "read, grep, find, ls")  # the pi default read_tools
+        p = self.e.run("list")
+        self.assertIn("tools with --tools read: read, grep, find, ls", p.stdout)
 
     def test_socket_permissions(self):
         st = (self.e.home / "advisord.sock").stat()

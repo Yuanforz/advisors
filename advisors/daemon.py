@@ -21,7 +21,7 @@ from .backends.base import Backend, BackendError
 from .backends.codex_app import CodexBackend, HandshakeError
 from .backends.codex_exec import CodexExecBackend
 from .backends.pi_rpc import PiBackend
-from .probe import availability, capability_view, effective_efforts, probe, resolve_bins
+from .probe import availability, capability_view, effective_efforts, probe, read_tools_view, resolve_bins
 from .quota import QuotaCache
 from .registry import CODEX, PI, Advisor, Registry, RegistryError
 from .run import Run
@@ -794,7 +794,8 @@ class Daemon:
             out.append({
                 "id": a.id, "model": a.model, "backend": a.backend, "billing": a.billing, "paid": a.paid,
                 "description": a.description, "efforts": list(efforts), "default_effort": a.default_effort,
-                "efforts_dropped": dropped, "capabilities": capability_view(a, caps), "available": ok,
+                "efforts_dropped": dropped, "capabilities": capability_view(a, caps), "tools": read_tools_view(a),
+                "available": ok,
                 "availability": why, "quota": q if isinstance(q, dict) else ({"text": f"quota lookup failed: {q!r}"} if q else None),
                 "group": self.sched.usage(a.group),
                 "breaker": {"max_tool_calls": self.limits.paid_max_tool_calls, "max_sec": self.limits.paid_max_sec} if a.paid else None,

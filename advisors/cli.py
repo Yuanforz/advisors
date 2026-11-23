@@ -419,6 +419,8 @@ def cmd_list(a: argparse.Namespace) -> int:
         q = x.get("quota")
         if q and q.get("text"):
             print(f"  quota: {q['text']}")
+        if x.get("tools"):
+            print(f"  tools with --tools read: {x['tools']}")
         c = x["capabilities"]
         print(f"  steer: {c.get('steer')}")
         print(f"  interrupt: {c.get('interrupt')}")
@@ -489,8 +491,9 @@ def build_parser() -> argparse.ArgumentParser:
                    "images are sent as image input")
     q.add_argument("--cwd", help="the advisor's working directory (default: the current directory; new sessions only)")
     q.add_argument("--tools", choices=["read", "none"], default="read",
-                   help="read (default): read-only tools (pi: read files; Codex: also commands in a read-only "
-                        "sandbox and web search). none: no tools, so the answer rests on --files alone")
+                   help="read (default): the advisor's read-only tools, listed by `advisors list` (pi: reading files, "
+                        "plus web search if its config adds it; Codex: also commands in a read-only sandbox and web "
+                        "search). none: no tools, so the answer rests on --files alone")
     q.add_argument("--key", help="idempotency key: resubmitting the same key returns the original turn "
                    "and is not charged again")
     q.add_argument("--label", help="a recognizable name for this turn (and for a new session)")

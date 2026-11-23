@@ -16,7 +16,8 @@
 #                     "codex"          Codex account/rateLimits (codex-app-server only)
 #                     "vertex-budget"  read-only estimate from the bundled vertex-budget pi extension
 #                     "<name>:<arg>"   a quota source defined by a plugin in ~/.advisors/plugins/
-#   read_tools      pi only: the tool allowlist for `--tools read` (default read, grep, find, ls).
+#   read_tools      pi only: the tool allowlist for `--tools read` (default read, grep, find, ls). With the
+#                   pi-web-access package installed, add web_search, fetch_content, get_search_content for web search.
 #                   Add "read_many" if you installed pi-extensions/read-many.ts
 #   description     shown by `advisors list`. The calling model picks advisors from it, so say what the
 #                   advisor is good for, what it costs, and when not to use it

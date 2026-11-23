@@ -55,7 +55,7 @@ advisors log SESSION            # a human-readable session record
   - With `--session` the session continues; the advisor cannot be changed (a session is bound to one advisor) and the working directory is fixed.
   - While a session is running a turn, `ask` returns busy with the running turn's id. It never silently turns into a steer.
 - **`--tools`**
-  - `read` (default): pi gets the advisor's `read_tools` (default `read,grep,find,ls`); Codex runs with the `read-only` sandbox and `approvalPolicy: never`.
+  - `read` (default): pi gets the advisor's `read_tools` (default `read,grep,find,ls`; adding the pi-web-access tools gives it web search); Codex runs with the `read-only` sandbox and `approvalPolicy: never`.
   - `none`: no tools; material can only come in through `--files`. For an answer that must rest on the attached material alone. For Codex this turns off the shell, `view_image` and web search; Codex 0.171 nests tools inside one code-mode `exec` tool, so each is turned off by name, and `tests/manual/codex_tools.py` prints what a thread really gets.
 - **`--files`**: text files are inlined into the prompt; images are sent as image inputs.
 - **`--key`**

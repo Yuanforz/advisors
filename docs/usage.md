@@ -18,7 +18,7 @@ advisors log SESSION
 - **`ask`** waits in the foreground: progress on stderr, then the answer on stdout and one metadata line (advisor, requested / sent / confirmed effort, session, turn, time, tokens or cost, remaining quota, path of the full answer). SIGTERM or SIGINT stops the turn.
 - **Background** is the caller's choice. In Claude Code, run `advisors ask …` with Bash `run_in_background`: the output file is the live progress, the harness notifies you at the end, and TaskStop stops the turn.
 - **`--session S`** continues a session. A session is bound to one advisor and one working directory. If it is running a turn, `ask` exits with code 3 and names that turn instead of turning into a steer.
-- **`--tools read`** (default) lets the advisor check things itself: pi advisors read files; Codex advisors also run commands in a read-only sandbox and search the web. **`--tools none`** gives no tools; attach material with `--files` (text is inlined, images are sent as images).
+- **`--tools read`** (default) lets the advisor check things itself: pi advisors get the tools in their `read_tools` (reading files by default); Codex advisors also run commands in a read-only sandbox and search the web. `advisors list` shows each advisor's tools. **`--tools none`** gives no tools; attach material with `--files` (text is inlined, images are sent as images).
 - **`--key K`** is an idempotency key: the same key returns the original turn instead of running and paying for it again.
 - **`status`** shows the phase, the last backend event and how long ago it was, recent tool calls, and the tail of the answer with a cursor (`--since` continues from it). Raw thinking is never shown.
 - **`steer`** reports `delivered`, `queued` (waits for the next gap), `expired` (the turn already ended) or `unsupported`. `--mode follow_up` delivers after the current answer, still within the turn.
@@ -52,9 +52,19 @@ advisors log SESSION
 
 ## What advisors can see
 
-- The prompt, files attached with `--files`, and with `--tools read` (the default) whatever their read-only tools reach. pi's read tools are **not** confined to the working directory, and Codex's read-only sandbox can read anything your user can. Treat an advisor like a colleague with read access to your account.
+- The prompt, files attached with `--files`, and with `--tools read` (the default) whatever their read-only tools reach, including the web when they have web search (their queries go to the search provider). pi's read tools are **not** confined to the working directory, and Codex's read-only sandbox can read anything your user can. Treat an advisor like a colleague with read access to your account.
 - That includes other advisors' earlier answers (under `~/.advisors/sessions/`, and in Codex's and pi's own session logs). Every advisor is instructed not to open them; this is a soft rule, not a sandbox. When an answer must rest on the attached material alone, use `--tools none`.
 - Nothing is written into the working directory. Records live under `~/.advisors/` (mode 0700; the socket is 0600).
+
+## Web search for pi advisors
+
+Codex advisors search the web out of the box. To give a pi advisor web search, install the [pi-web-access](https://github.com/nicobailon/pi-web-access) package (`pi install npm:pi-web-access`; it works without an API key through Exa) and add its tools to the advisor's `read_tools`:
+
+```toml
+read_tools = ["read", "grep", "find", "ls", "web_search", "fetch_content", "get_search_content"]
+```
+
+Each search or page fetch is one more tool call, which costs more on a paid advisor.
 
 ## Plugins
 

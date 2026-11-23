@@ -21,7 +21,7 @@ Run `advisors list`. It shows each advisor's description, whether it is availabl
 
 ## Tools
 
-- Give advisors tools (`--tools read`, the default). pi advisors can read files; Codex advisors can also run commands in a read-only sandbox and search the web. An advisor that checks the code, data and docs itself is worth much more than one that only reads your summary.
+- Give advisors tools (`--tools read`, the default). pi advisors can read files, and search the web when `advisors list` shows web tools for them; Codex advisors can also run commands in a read-only sandbox and search the web. An advisor that checks the code, data and docs itself is worth much more than one that only reads your summary.
 - Every advisor is told not to open other reviewers' records, so tools do not spoil a blind review.
 - Use `--tools none` only when the answer must rest on the attached material alone, for example judging a text as written. Then attach everything with `--files`.
 
